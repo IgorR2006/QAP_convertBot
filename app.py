@@ -1,5 +1,4 @@
 import json
-
 import requests
 import telebot
 
@@ -15,6 +14,7 @@ keys = {
     'доллар': 'USD',
     'рубль': 'RUB'
 }
+
 
 @bot.message_handler(commands=['start', 'help'])
 def help(message: telebot.types.Message):
@@ -36,7 +36,8 @@ def convert(message: telebot.types.Message):
     quote, base, amount = message.text.split(' ')
     r = requests.get(f'https://min-api.cryptocompare.com/data/price?fsym={keys[quote]}&tsyms={keys[base]}')
     total_base = json.loads(r.content)[keys[base]]
-    text = f'Цена {amount} {quote} в {base} - {total_base}'
+    convert_amout = float(total_base) * float(amount)
+    text = f'Цена {amount} {quote} в {base} - {round(convert_amout, 2)}'
     bot.send_message(message.chat.id, text)
 
 
