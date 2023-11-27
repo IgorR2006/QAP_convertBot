@@ -3,7 +3,7 @@ import requests
 import telebot
 
 
-TOKEN = ' '
+TOKEN = '6421247490:AAGKMQNK7BzNDcBM0CFJNsAmDfDi3JzKaco'
 
 
 bot = telebot.TeleBot(TOKEN)
@@ -15,6 +15,8 @@ keys = {
     'рубль': 'RUB'
 }
 
+class ConvertionException(Exception):
+    pass
 
 @bot.message_handler(commands=['start', 'help'])
 def help(message: telebot.types.Message):
@@ -33,7 +35,17 @@ def help(message: telebot.types.Message):
 
 @bot.message_handler(content_types=['text', ])
 def convert(message: telebot.types.Message):
-    quote, base, amount = message.text.split(' ')
+    low_text = message.text.lower()
+    values = low_text.split(' ')
+    
+    if len(values) > 3:
+        raise ConvertionException('Слишком много параметров')
+           
+    quote, base, amount = values
+    
+    if quote == base:
+        raise ConvertionException(f'Невозможно перевести одинаковые валлюты {base}')        
+    
     r = requests.get(f'https://min-api.cryptocompare.com/data/price?fsym={keys[quote]}&tsyms={keys[base]}')
     total_base = json.loads(r.content)[keys[base]]
     convert_amout = float(total_base) * float(amount)
